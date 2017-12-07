@@ -2,10 +2,13 @@ var zmq = require('zmq');
 var frontend = zqm.require('router');
 var backend = zqm.require('router');
 
-var frontend_port = 8059;
-var backend_port = 8060;
+var args = process.argv.slice(2);
+var frontend_port = args[0] || 8059;
+var backend_port = args[1] || 8060;
 
+// Array of available workers
 var workers = [];
+// Array of pending clients
 var clients = [];
 
 frontend.bindSync("tcp://*:" + frontend_port);
@@ -14,21 +17,24 @@ frontend.bindSync("tcp://*:" + backend_port);
 // When the frontend recive a petition
 frontend.on("message", function(){
 	var args = Array.apply(null, arguments);
-	if(workers.length > 0){ // There are one or more workers
-		var myWorker = workers.shift(); // Getting the firts id worker
-		var m = [myWorker,''].concat(args);
+	if(workers.length > 0){ // There is any available worker
+		var myWorker = workers.shift(); // Getting the oldest id worker
+		var m = [myWorker,''].concat(args); // Create a multi-segment message
 		backend.send(m); // Sending msg to worker
-	}else
+	}else // No available worker exist
+		// Save the client ID and message into the clients array
 		clients.push({id: args[0],msg: args.slice(2)});
 });
 
-function processPendingClient(workerID){
+function processPendingClient(worker_id){
+	// Check whether there is any pending client
 	if(clients.length > 0) {
-		var nextClient = clients.shift();
-		var m = [workerID,'',nextClient.id,''].concat(nextClient.msg);
+		// Get first client data
+		var client = clients.shift();
+		var m = [worker_id,'',client.id,''].concat(client.msg);
 		backend.send(m);
 		return true;
-	}else
+	}else // no client is there
 		return false;
 }
 
