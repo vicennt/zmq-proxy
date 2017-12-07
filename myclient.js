@@ -10,7 +10,7 @@ if(args[args.length - 1] == "-v"){
 	verbose = true;
 	args.pop();
 }
-
+req.identity = my_id;
 req.connect(frontend_url);
 if(verbose){
 	console.log('Client (%s) connected to "%s"', my_id, frontend_url);
