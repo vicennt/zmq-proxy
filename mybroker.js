@@ -1,4 +1,5 @@
 var zmq = require('zmq');
+var aux = require('./auxfunctions')
 var frontend = zmq.socket('router');
 var backend = zmq.socket('router');
 
@@ -10,6 +11,13 @@ var backend_port = args[1] || 8060;
 var workers = [];
 // Array of pending clients
 var clients = [];
+
+var verbose = false;
+
+if(args[args.length - 1] == "-v"){
+    verbose = true;
+    args.pop();
+}
 
 frontend.bindSync("tcp://*:" + frontend_port);
 frontend.bindSync("tcp://*:" + backend_port);
@@ -33,10 +41,19 @@ function processPendingClient(worker_id){
 		// Get first client data
 		var client = clients.shift();
 		var m = [worker_id,'',client.id,''].concat(client.msg);
-		backend.send(m);
+		sendToWorker(m);
 		return true;
 	}else // no client is there
 		return false;
+}
+
+function sendToWorker(msg){
+    if(verbose){
+        console.log('Sending client (%s) request to worker (%s) through backend.',
+            msg[2], msg[0]);
+        aux.showMessage(msg);
+    }
+    backend.send(msg);
 }
 
 
