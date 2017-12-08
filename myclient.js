@@ -1,5 +1,9 @@
+// Execution example -> $node myclient.js "tcp://localhost:8059" "Client1" "Work" -v
+
 var zmq = require('zmq');
 var req = zmq.socket('req');
+
+// Getting atributes from command line arguments
 var args = process.argv.slice(2);
 var frontend_url = args[0] || "tcp://localhost:8059";
 var my_id = args[1] || "NONE";
@@ -11,6 +15,7 @@ if(args[args.length - 1] == "-v"){
 	args.pop();
 }
 
+// Specify client identity
 req.identity = my_id;
 req.connect(frontend_url);
 

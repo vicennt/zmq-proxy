@@ -1,7 +1,9 @@
+// Execution example -> $node myworker.js "tcp://localhost:8060" "Worker1" "Ready" "Done" -v
+
 var zmq = require("zmq");
 var resp = zmq.socket("req");
 var args = process.argv.slice(2);
-var backend_url = args[0] || "tcp://localhost:8059";
+var backend_url = args[0] || "tcp://localhost:8060";
 var my_id = args[1] || "NONE";
 var disp_text = args[2] || "Ready";
 var reply_text = args[3] || "Done";

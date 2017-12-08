@@ -1,3 +1,5 @@
+// Execution example -> $node mybroker.js 8059 8060 -v
+
 var zmq = require('zmq');
 var aux = require('./auxfunctions')
 var frontend = zmq.socket('router');
@@ -13,7 +15,6 @@ var workers = [];
 var clients = [];
 
 var verbose = false;
-
 if(args[args.length - 1] == "-v"){
     verbose = true;
     args.pop();
