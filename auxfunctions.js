@@ -26,8 +26,16 @@
  	  return Math.abs(Math.round(Math.random() * n)) + 1;
  	}
 
- 	
- 	  // *** ordered list functions for workers management
+
+ 	// *** showMessage function
+    function showMessage(msg) {
+        for(var i = 0; i < msg.length; i++){
+            console.log('   Segment %d: %s', i, msg[i]);
+        }
+    }
+
+
+    // *** ordered list functions for workers management
  	  // list has an "ordered" property (true|false) and a data property (array)
  	  // data elements consists of pairs {id, load}
  	
