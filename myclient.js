@@ -1,9 +1,9 @@
 var zmq = require('zmq');
 var req = zmq.socket('req');
 var args = process.argv.slice(2);
-var frontend_url = args[0]; // Ex. tcp://localhost:8059 -> Frontend
-var my_id = args[1]; // Ex. Client1
-var my_msg = args[2]; // Ex. ["Work"]
+var frontend_url = args[0] || "tcp://localhost:8059";
+var my_id = args[1] || "NONE";
+var my_msg = args[2] || "Work";
 var verbose = false;
 
 if(args[args.length - 1] == "-v"){
