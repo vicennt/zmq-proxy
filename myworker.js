@@ -20,7 +20,7 @@ if(args[args.length - 1] == "-v"){
 if(my_id != "NONE")
     req.identity = my_id;
 
-req.connect(backend_url);
+req.connect(backend_url); //
 req.send([disp_text, class_id]);
 
 if(verbose){
