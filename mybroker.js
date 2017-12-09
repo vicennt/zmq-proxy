@@ -21,56 +21,68 @@ if(args[args.length - 1] == "-v"){
 }
 
 frontend.bindSync("tcp://*:" + frontend_port);
-frontend.bindSync("tcp://*:" + backend_port);
+backend.bindSync("tcp://*:" + backend_port);
 
-// When the frontend recive a petition
+if(verbose)
+    console.log("Proxy are online now");
+
+
+// When the frontend recive a client petition
 frontend.on("message", function(){ // Socket add ID client automatically
-    var args = Array.apply(null, arguments); // Ex. ["Client1","","Work"]
-    console.log("arguments in msg socket frontend: " + args);
+    if(verbose) {
+        console.log("[FRONTEND LOG] New petition from a client");
+        console.log("[FRONTEND LOG] Arguments: " + aux.convertArrayToString(arguments));
+    }
+
+    var args = Array.apply(null, arguments);
 	if(workers.length > 0){ // There is any available worker
-		var myWorker = workers.shift(); // Getting the oldest id worker
+        if(verbose)
+            console.log("[FRONTEND LOG] Worker available, forwarding client request");
+        var myWorker = workers.shift(); // Getting the oldest id worker
 		var m = [myWorker,''].concat(args); // Ex. ["Worker1","","Client1","","Work"]
 		backend.send(m); // Sending msg to worker
 	}else // No available worker exist
-		// Save the client ID and message into the clients array
-		clients.push({id: args[0],msg: args.slice(2)});
+        if(verbose)
+            console.log("[FRONTEND LOG] No worker available, saving client petition");
+	    clients.push({id: args[0],msg: args.slice(2)}); // Save client petition
+
 });
 
+// This function is called for two reasons (1.New worker online 2. Worker end your job)
 function processPendingClient(worker_id){
 	// Check whether there is any pending client
 	if(clients.length > 0) {
 		// Get first client data
 		var client = clients.shift();
-		var m = [worker_id,'',client.id,''].concat(client.msg);
-		sendToWorker(m);
-		return true;
+		var msg = [worker_id,'',client.id,''].concat(client.msg);
+        backend.send(msg);
+        if(verbose) {
+            console.log("[BACKEND LOG] Sending client (%s) request to worker (%s) through backend.", msg[2], msg[0]);
+            console.log("[BACKEND LOL] Message: " + aux.convertArrayToString(msg));
+        }
+        return true;
 	}else // no client is there
 		return false;
 }
 
-function sendToWorker(msg){
-    if(verbose){
-        console.log('Sending client (%s) request to worker (%s) through backend.',
-            msg[2], msg[0]);
-        aux.showMessage(msg);
-    }
-    backend.send(msg);
-}
-
-
 backend.on("message", function(){
-	console.log("arguments in msg socket backend: " + arguments.toString());
-	var args = Array.apply(null, arguments); // Ex. ["Client1","","Work"]
-	if(args.length == 3) {
-		if(!processPendingClient(args[0])) {
+    if(verbose)
+        console.log("[BACKEND LOG] Arguments: " + aux.convertArrayToString(arguments));
+
+	var args = Array.apply(null, arguments);
+	if(args.length == 3) { // Msg from worker  Ex. ["Worker1","","Ready"] or ["Client1","","Done"]
+        if(verbose)
+            console.log("[BACKEND LOG] Message recived from worker");
+        if(!processPendingClient(args[0])) // Check if there are clients waiting
             workers.push(args[0]);
-        }else{
-			var workerID = args[0];
-			args.args.slice(2);
-			frontend.send(args);
-			if(!processPendingClient(workerID))
-				workers.push(workerID);
-		}
+	}else{ // Response msg for the client through the frontend
+        if(verbose)
+	        console.log("[BACKEND LOG] Trasmitting the msg to the client");
+        var workerID = args[0];
+        args = args.slice(2); // Delete worker id and delimitter
+        frontend.send(args);
+        if(!processPendingClient(workerID)) // Check if there are clients waiting
+            workers.push(workerID);
 	}
 });
 
