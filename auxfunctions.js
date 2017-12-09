@@ -34,6 +34,16 @@
         }
     }
 
+    function convertArrayToString(a){
+        var res = "{";
+        for(var i = 0; i < a.length - 1; i++)
+            if(a[i] == "")
+                res += '"",';
+            else
+                res += a[i] + ",";
+        return res + a[a.length -1] + "}";
+    }
+
 
     // *** ordered list functions for workers management
  	  // list has an "ordered" property (true|false) and a data property (array)
@@ -69,4 +79,5 @@
  	module.exports.orderedList = orderedList;
  	module.exports.nonempty = nonempty;
  	module.exports.lowest = lowest;
- 	module.exports.insert = insert; 
+ 	module.exports.insert = insert;
+ 	module.exports.convertArrayToString = convertArrayToString;
