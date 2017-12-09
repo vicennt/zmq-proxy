@@ -15,19 +15,17 @@ if(args[args.length - 1] == "-v"){
 	args.pop();
 }
 
-// Specify client identity
-req.identity = my_id;
+if(my_id != "NONE")
+    req.identity = my_id;
+
 req.connect(frontend_url);
-
-if(verbose){
-	console.log('Client (%s) connected to "%s"', my_id, frontend_url);
-}
-
 req.send(my_msg); // Ex. ["","Work"] (socket add delimiter)
-
+if(verbose)
+	console.log('Client (%s) connected to "%s" send this msg -> (%s)', my_id, frontend_url, my_msg);
 
 req.on("message", function(msg){
-	console.log('Client (%s) has received rely "%s"', my_id, msg.toString());
+    if(verbose)
+	    console.log('Client (%s) has received reply "%s"', my_id, msg.toString());
 	process.exit(0);
 });
 
